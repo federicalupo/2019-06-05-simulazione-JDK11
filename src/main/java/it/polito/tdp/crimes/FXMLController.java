@@ -7,6 +7,7 @@ package it.polito.tdp.crimes;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.model.Arco;
 import it.polito.tdp.crimes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,7 +26,7 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
     private ComboBox<?> boxMese; // Value injected by FXMLLoader
@@ -47,6 +48,20 @@ public class FXMLController {
 
     @FXML
     void doCreaReteCittadina(ActionEvent event) {
+    	this.txtResult.clear();
+    	
+    	Integer anno = this.boxAnno.getValue();
+    	model.creaGrafo(anno);
+    	txtResult.appendText(String.format("Grafo creato!\n#vertici:  %d\n#archi:  %d\n", model.nVertici(),model.nArchi()));
+    	
+    	for(int i=1; i<8; i++) {
+    		txtResult.appendText("\nDistretti adiacenti a distretto n°  "+i+"\n");
+    		
+    		for(Arco a: model.distrettiAdiacenti(i)) {
+    			this.txtResult.appendText(a.toString()+"\n");
+    			
+    		}
+    	}
 
     }
 
@@ -69,5 +84,7 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxAnno.getItems().addAll(model.anni());
+    	this.boxAnno.setValue(model.anni().get(0));
     }
 }
