@@ -3,6 +3,7 @@ package it.polito.tdp.crimes.model;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -19,9 +20,11 @@ public class Model {
 	private EventsDao dao;
 	private Graph<Integer, DefaultWeightedEdge> grafo;
 	private List<Distretto> distretti;
+	private Simulazione simulazione;
 	
 	public Model() {
 		dao = new EventsDao();
+		simulazione = new Simulazione();
 	}
 	
 	public List<Integer> anni(){
@@ -73,4 +76,26 @@ public class Model {
 	public Integer nArchi() {
 		return this.grafo.edgeSet().size();
 	}
+	
+	public Integer simula(Integer giorno, Integer mese, Integer anno, Integer agentiD) {
+		
+		PriorityQueue<Evento> coda = dao.coda(giorno, mese, anno);
+		if(coda.size()==0) { //se mese-giorno sbagliati, es 31 aprile
+			return null;
+		}
+		
+		simulazione = new Simulazione();
+		
+		
+		simulazione.init(grafo, dao.coda(giorno, mese, anno), agentiD, dao.centrale(anno));
+		simulazione.run();
+		
+		return simulazione.getnMalGestiti();
+		
+	}
+	public Integer getCont() {
+		return simulazione.getCont();
+	}
+	
+	
 }

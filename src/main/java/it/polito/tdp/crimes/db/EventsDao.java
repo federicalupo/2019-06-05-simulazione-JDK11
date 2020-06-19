@@ -8,11 +8,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import com.javadocmd.simplelatlng.LatLng;
 
 import it.polito.tdp.crimes.model.Distretto;
 import it.polito.tdp.crimes.model.Event;
+import it.polito.tdp.crimes.model.Evento;
+import it.polito.tdp.crimes.model.Evento.EventType;
 
 
 
@@ -142,6 +145,73 @@ public class EventsDao {
 			return;
 		}
 		
+	}
+	
+	public Integer centrale(Integer anno) {
+		
+		String sql ="select district_id, count(incident_id) as c " + 
+				"from events " + 
+				"where year(reported_date)=? " + 
+				"group by events.`district_id` " + 
+				"order by c asc";
+		Integer centrale=null;
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, anno);
+			
+			ResultSet res = st.executeQuery() ;
+			
+			if(res.next()) { //basta la prima riga
+				centrale = res.getInt("district_id");
+			}
+			
+			conn.close();
+			return centrale;
+			
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		
+	}
+	
+	public PriorityQueue<Evento> coda(int giorno, int mese, int anno){
+		String sql="select offense_category_id, district_id, reported_date " + 
+				"from events " + 
+				"where year(reported_date)=? " + 
+				"and month(reported_date)=? " + 
+				"and day(reported_date) = ? " + 
+				"order by reported_date";
+		PriorityQueue<Evento> coda = new PriorityQueue<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, anno);
+			st.setInt(2, mese);
+			st.setInt(3, giorno);
+			
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) { 
+				coda.add(new Evento(res.getString("offense_category_id"),
+									res.getTimestamp("reported_date").toLocalDateTime(),
+									res.getInt("district_id"), EventType.CRIMINE));
+		 
+			}
+			
+			conn.close();
+			return coda; 
+			
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }

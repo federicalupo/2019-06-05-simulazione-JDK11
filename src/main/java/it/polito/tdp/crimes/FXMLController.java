@@ -29,10 +29,10 @@ public class FXMLController {
     private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
-    private ComboBox<?> boxMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGiorno"
-    private ComboBox<?> boxGiorno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxGiorno; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnCreaReteCittadina"
     private Button btnCreaReteCittadina; // Value injected by FXMLLoader
@@ -58,16 +58,52 @@ public class FXMLController {
     		txtResult.appendText("\nDistretti adiacenti a distretto n°  "+i+"\n");
     		
     		for(Arco a: model.distrettiAdiacenti(i)) {
-    			this.txtResult.appendText(a.toString()+"\n");
-    			
+    			this.txtResult.appendText(a.toString()+"\n");		
     		}
     	}
-
+    	
+    	for(int i=1;i<13;i++) {
+    		this.boxMese.getItems().add(i);
+    	}
+    	this.boxMese.setValue(1);
+    	
+    	for(int i=1;i<32;i++) {
+    		this.boxGiorno.getItems().add(i);
+    	}
+    	this.boxGiorno.setValue(1);
+    	
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	//controllo mese-giorno
+    	this.txtResult.clear();
+    	
+    	try {
+    	Integer agentiD = Integer.valueOf(this.txtN.getText());
+    	if(agentiD>10 || agentiD<1) {
+    		this.txtResult.appendText("Inserire valore di N compreso tra 1 e 10\n");
+    		return;
+    	}
+    	
+  
+    	Integer n = model.simula(this.boxGiorno.getValue(), this.boxMese.getValue(), this.boxAnno.getValue(), agentiD);
+    	
+    	if(n==null) {
+    		this.txtResult.appendText("Giorno/Mese non disponibili\n");
+    		
+    	}else {
+    		this.txtResult.appendText(String.format("Il giorno %d/%d/%d, si sono verificati %d eventi mal gestiti, in presenza di %d agenti",
+    				this.boxGiorno.getValue(), this.boxMese.getValue(), this.boxAnno.getValue(), n, agentiD));
+    		this.txtResult.appendText("\nEventi a cui non è arrivato nessuno: "+model.getCont());
+    	}
+    	
+    	
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserire valore di N corretto");
+    	}
+    	
+    
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
